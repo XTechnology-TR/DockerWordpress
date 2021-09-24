@@ -1,0 +1,55 @@
+version: '3.9'
+
+services:
+    mysql:
+        image: mysql:5.7
+        container_name: ${PROJECT_NAME}_mysql
+        volumes: 
+            - ./docker/mysql/data:/var/lib/mysql
+        restart: always
+        environment: 
+            MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+            MYSQL_DATABASE: ${MYSQL_DATABASE}
+            MYSQL_USER: ${MYSQL_USER}
+            MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+        networks:
+            - wpdevelopment
+
+    wordpress:
+        image: wordpress:latest
+        container_name: ${PROJECT_NAME}_site
+        volumes: 
+            - ./src:/var/www/html
+        ports: 
+            - '8000:80'
+        restart: always
+        environment: 
+            WORDPRESS_DB_HOST: mysql:3306
+            WORDPRESS_DB_USER: ${WORDPRESS_DB_USER}
+            WORDPRESS_DB_PASSWORD: ${WORDPRESS_DB_PASSWORD}
+            WORDPRESS_DB_NAME: ${WORDPRESS_DB_NAME}
+        depends_on:
+            - mysql
+        networks:
+            - wpdevelopment
+    
+    phpmyadmin:
+        image: phpmyadmin/phpmyadmin
+        container_name: ${PROJECT_NAME}_phpmyadmin
+        restart: always
+        ports: 
+            - "8181:80"
+        environment: 
+            PMA_HOST: mysql:3306
+            MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+        depends_on:
+            - mysql
+        networks:
+            - wpdevelopment
+
+networks: 
+    wpdevelopment:            
+
+volumes: 
+    mysql_data: {}
+    wp_data: {}
